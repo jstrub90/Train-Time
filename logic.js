@@ -33,22 +33,32 @@ var config = {
   });
 
   database.ref().on("child_added", function(snapshot){
-    var sv = snapshot.val();
+    var trainDiff = 0;
+    var trainRemainder = 0;
+    var minutesTillArrival = "";
+    var nextArrival = "";
+    var frequency = snapshot.val().frequency;
 
-    console.log(sv.trainName);
-    console.log(sv.destination);
-    console.log(sv.trainTime);
-    console.log(sv.frequency);
+    // compute the difference in time from 'now' and the first train using UNIX timestamp, store in var and convert to minutes
+    trainDiff = moment().diff(moment.unix(snapshot.val().time), "minutes");
+
+    // get the remainder of time by using 'moderator' with the frequency & time difference, store in var
+    trainRemainder = trainDiff % frequency;
+
+    // subtract the remainder from the frequency, store in var
+    minutesTillArrival = frequency - trainRemainder;
+
+    // add minutesTillArrival to now, to find next train & convert to standard time format
+    nextArrival = moment().add(minutesTillArrival, "m").format("hh:mm A");
     
-//     var tr = `<tr>
-//                   <td>${sv.name}</td>
-//                   <td>${sv.role}</td>
-//                   <td>${sv.startDate}</td>
-//                   <td>${monthsWorked}</td>
-//                   <td>${sv.monthlyRate}</td>
-//                   <td>${totalBilled}</td>
-//               </tr>`
-//   $("#tableBody").append(tr);
+    var tr = `<tr>
+                  <td>${trainName}</td>
+                  <td>${destination}</td>
+                  <td>${frequency}</td>
+                  <td>${nextArrival}</td>
+                  <td>${minutesTillArrival}</td>
+              </tr>`
+  $("#tableBody").append(tr);
 
 
 })
